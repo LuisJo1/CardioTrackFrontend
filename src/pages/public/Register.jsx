@@ -1,43 +1,71 @@
-import "./styles/register.css";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
+import styles from "./styles/Register.module.css";
 
 import imgLogin from "../../assets/images/profile-img.png";
 
 const Register = () => {
   return (
     <>
-      <div className="container-main">
-        <div className="container-login">
-          <div className="container-title">
+      <div className={styles.containerMain}>
+        <div className={styles.containerLogin}>
+          <div className={styles.containerTitle}>
             <div>
-              <h2 className="login-title">Registro</h2>
-              <h3 className="login-subtitle">Cardio Track</h3>
+              <h2 className={styles.loginTitle}>Registro</h2>
+              <h3 className={styles.loginSubtitle}>Cardio Track</h3>
             </div>
-            <img className="img-profile" src={imgLogin} alt="" />
+            <img className={styles.imgProfile} src={imgLogin} alt="" />
           </div>
 
-          <form className="container-form">
-            <div className="container-form-card">
-              <div className="form-label" htmlFor="">
+          <form className={styles.containerForm}>
+            <div className={styles.containerFormCard}>
+              <div className={styles.formLabel} htmlFor="">
+                Nombre
+              </div>
+              <input className={styles.formInput} type="text" />
+            </div>
+
+            <div className={styles.containerFormCard}>
+              <div className={styles.formLabel} htmlFor="">
+                Edad
+              </div>
+              <input className={styles.formInput} type="number" />
+            </div>
+
+            <div className={styles.containerFormCard}>
+              <div className={styles.formLabel} htmlFor="">
+                Sexo
+              </div>
+              <select className={styles.formInput}>
+                <option defaultValue="0">Seleccione</option>
+                <option value="1">Masculino</option>
+                <option value="2">Femenino</option>
+              </select>
+            </div>
+
+            <div className={styles.containerFormCard}>
+              <div className={styles.formLabel} htmlFor="">
                 Email
               </div>
-              <input className="form-input" type="text" />
+              <input className={styles.formInput} type="text" />
             </div>
-            <div className="container-form-card">
-              <div className="form-label" htmlFor="">
+
+            <div className={styles.containerFormCard}>
+              <div className={styles.formLabel} htmlFor="">
                 Contraseña
               </div>
-              <input className="form-input" type="text" />
+              <input className={styles.formInput} type="text" />
             </div>
 
-            <button className="button-login">Ingresar</button>
+            <button className={styles.buttonLogin}>Ingresar</button>
           </form>
 
-          <div className="container-text-register">
+          <div className={styles.containerTextRegister}>
             <p>
               ¿Tienes una cuenta?{" "}
-              <Link to='/login' className="span-text-register">Iniciar sesión</Link>{" "}
+              <Link to="/login" className={styles.spanTextRegister}>
+                Iniciar sesión
+              </Link>{" "}
             </p>
           </div>
         </div>

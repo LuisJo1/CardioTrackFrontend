@@ -18,7 +18,7 @@ const useAuth = () => {
 
 // Componente proveedor del contexto
 const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [user, setUser] = useState(null);
 
   // Función para iniciar sesión (ejemplo)

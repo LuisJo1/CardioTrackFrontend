@@ -7,6 +7,7 @@ function PageInitialRoute() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log(isAuthenticated)
     if (isAuthenticated) {
       navigate('/profile');
     } else {
