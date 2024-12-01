@@ -1,0 +1,271 @@
+.containerProfile {
+  background-color:#f8f8fb;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.imgProfile {
+  max-width: 150px;
+}
+.showOnDesktop {
+  display: none;
+}
+.containerCardDatePerson {
+ background-color: white;
+ padding: 10px;
+ flex-direction: column;
+ align-items: flex-start;
+ border-radius: 10px;
+}
+
+.containerPersonalData {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: .8;
+}
+.titlePersonalData {
+  font-weight: 500;
+  font-size: 18px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #2b2b2b20;
+  padding-bottom: 10px;
+}
+.mobilePersonalDataContainer {
+  margin-top: 20px;
+  padding: 4px;
+  background-color: white;
+}
+.mobilePersonalDataHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2b2b2b20;
+}
+.mobilePersonalDataImgContainer {
+  display: flex;
+  justify-content: flex-start;
+}
+.mobilePersonalDataImgContainer > img{
+  max-width: 80px;
+}
+.mobilePersonalDataHeader > h4 {
+  font-size: 20px;
+  font-weight: 500;
+}
+.mobilePersonalDataLogoutBtn{
+  padding: 8px;
+  background-color: #f8f8f8;
+  color: #333333;
+  border: 1px solid #2b2b2b20;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.mobilePersonalDataDetails {
+  padding: 4px 4px;
+  font-size: 15px;
+}
+.mobilePersonalDataDetails > div {
+  padding: 2px 0;
+}
+.mobilePersonalDataDetails > div > strong {
+  font-weight: 500;
+  margin-right: 2px;
+}
+.mobilePersonalDataDetails > h5{
+  font-weight: 600;
+}
+.mobilePersonalDataDetails > h6{
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 14px;
+  opacity: .72;
+}
+.namePersonalData {
+  font-weight: 600;
+}
+
+.labelPersonalData {
+  font-weight: 600;
+}
+.footerPersonalData {
+  margin-top: 40px;
+}
+
+.mainPanel {
+  background-color: #f8f8fb;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.currentPatientsContainer {
+  border: 1px solid #2b2b2b20;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.searchPatientContainer {
+  border: 1px solid #2b2b2b20;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.searchPatientHeader {
+  border-radius: 10px 10px 0 0;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 8px;
+  border-bottom: 1px solid #2b2b2b20;
+}
+.searchPatientHeader > h4 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #4b4b4a;
+}
+.searchPatientHeaderImgContainer > img {
+  max-width: 108px;
+}
+.searchPatientFooter {
+  padding: 8px;
+  background-color: white;
+}
+.searchPatientSearchInputContainer{
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.searchPatientSearchInputContainer > input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 0.4rem;
+}
+.helloMainPanel {
+  border-radius: 10px;
+  background-color: white;
+  padding: 20px 0;
+  font-size: 24px;
+  font-weight: 600;
+  padding-left: 4px;
+}
+.searchPatientList{
+  margin-top: 10px;
+  display: flex;
+  max-height: 60vh;
+  width: 100%;
+  overflow-y: auto;
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px;
+}
+.searchPatientList > li {
+  box-shadow: 0px 4px 0 #1b1b1b21;
+  background-color: white;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #2b2b2b20;
+  cursor: pointer;
+}
+.searchPatientListItem:hover {
+  background-color: #f7f7f7;
+  transition: all 0.4s ease;
+  /* background-color: #000; */
+}
+.searchPatientItemHeader {
+  padding-bottom: 8px;
+  opacity: .8;
+}
+.searchPatientItemHeaderDoc{
+  font-weight: 600;
+  opacity: .8;
+  font-size: 15px;
+  margin-bottom: 8px;
+}
+.searchPatientItemHeader > h4{
+  font-size: 18px;
+  font-weight: 600;
+  color: #2e2f63;
+  margin-bottom: 3px;
+}
+.row {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 24px;
+}
+.searchPatientIconContainer{
+  position: relative;
+  padding-bottom: 16px;
+}
+.searchPatientIconContainer > i{
+  position: absolute;
+  right: 20px;
+  font-size: 24px;
+  color: #556ee6;
+}
+.searchPatientButtonContainer {
+  position: relative;
+  padding-bottom: 16px;
+}
+.searchPatientButtonContainer > button {
+  position: absolute;
+  right: 20px;
+}
+.label{
+  font-weight: 600;
+}
+
+@media screen and (min-width: 868px){
+  .currentPatientsContainer{
+    width: 50%;
+  }
+  .mobilePersonalDataContainer{
+    display: none;
+  }
+  .containerCardDatePerson {
+    width: 24%;
+    /* height: 600px; */
+    /* display: flex; */
+  }
+  .containerProfile {
+    padding: 20px;
+    flex-direction: row;
+  }
+  .actualTreatment {
+    width: 40%;
+  }
+  .row {
+    flex-direction: row;
+  }
+  .containerMedicBackground {
+    width: 60%;
+  }
+  .searchPatientContainer {
+    width: 60%;
+  }
+  .searchPatientSearchInputContainer > input {
+    width: 60%;
+  }
+  .card {
+    width: 50%;
+  }
+
+  .helloMainPanel {
+    padding: 20px 10px;
+  }
+  .showOnDesktop {
+    display: flex;
+  }
+
+  .mainPanel{
+    margin-left: 10px;
+    border-radius: 10px;
+    /* border-left: 1px solid #2b2b2b20; */
+  }
+}

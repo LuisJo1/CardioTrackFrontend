@@ -112,6 +112,15 @@
   font-weight: 600;
   padding-left: 4px;
 }
+.helloMainPanelButtonsContainer {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+.helloMainPanelButtonsContainer > button{ 
+  font-size: 14px;
+  font-weight: 600;
+}
 .actualTreatment {
   background-color: white;
   border: 1px solid #2b2b2b20;
