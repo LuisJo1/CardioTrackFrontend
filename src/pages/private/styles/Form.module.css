@@ -71,7 +71,7 @@
   gap: 6px;
   margin-top: 16px;
   flex-wrap: wrap;
-  width: 70%;
+  width: 100%;
 }
 .medicineAdded {
   border: 1px solid #2c758b80;
@@ -190,4 +190,12 @@
   width: 100%;
   border: 1px solid #ced4da;
   border-radius: 0.4rem;
+}
+
+
+@media screen and (min-width: 868px){
+  .medicinesAddedContainer{
+    width: 70%;
+    gap: 6px;
+  }
 }

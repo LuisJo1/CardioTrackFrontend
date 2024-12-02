@@ -12,7 +12,6 @@ import AddTreatmentForm from "./AddTreatmentForm";
 import AddExamForm from "./AddExamForm";
 
 const PatientAdministration = () => {
-  // const [first, setfirst] = useState(null);
   const [currentSection, setCurrentSection] = useState(0);
 
   return (

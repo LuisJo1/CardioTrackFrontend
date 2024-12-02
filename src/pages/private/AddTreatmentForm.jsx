@@ -1,5 +1,6 @@
 import styles from "./styles/Form.module.css";
 import addTreatmentImg from "../../assets/images/add-treatment.png";
+import { useEffect, useState } from "react";
 const AddTreatmentForm = () => {
   return (
     <>
@@ -166,7 +167,7 @@ const AddTreatmentForm = () => {
                 className={`button-primary-outline ${styles.addMedicineBtn}`}
                 style={{ marginTop: "10px" }}
               >
-                Añadir Medicamento
+                Añadir
               </button>
             </div>
           </div>

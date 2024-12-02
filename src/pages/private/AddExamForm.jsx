@@ -1,7 +1,21 @@
 import styles from "./styles/Form.module.css";
 import thisStyles from "./styles/AddExamForm.module.css";
 import exam from "../../assets/images/exam.png";
+import { useState, useEffect } from "react";
 const AddExamForm = () => {
+  const checkIsOnMobile = () => {
+    return window.matchMedia("(max-width: 868px)").matches;
+  };
+  const [isOnMobile, setIsOnMobile] = useState(checkIsOnMobile);
+
+  useEffect(() => {
+    window.addEventListener("resize", setIsOnMobile(checkIsOnMobile));
+
+    return () => {
+      window.removeEventListener("resize", setIsOnMobile(checkIsOnMobile));
+    };
+  }, []);
+
   return (
     <>
       <form className={styles.form}>
@@ -92,7 +106,7 @@ const AddExamForm = () => {
                 className="button-primary-outline button-md"
                 style={{ fontSize: "15px" }}
               >
-                Añadir otro antecedente
+                {isOnMobile ? "Añadir" : "Añadir otro antecedente"}
               </button>
             </div>
           </div>
