@@ -52,7 +52,9 @@
   border: 1px solid #ced4da;
   border-radius: 0.4rem;
 }
-
+.buttonLogin:disabled {
+  opacity: .7;
+}
 .buttonLogin {
   width: 100%;
   margin-top: 40px;

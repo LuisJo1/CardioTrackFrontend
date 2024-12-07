@@ -323,6 +323,61 @@
 .cardImgContainer > img {
   max-height: 108px;
 }
+.searchPatientFooter {
+  padding: 8px;
+  background-color: white;
+}
+.searchPatientSearchInputContainer{
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.searchPatientSearchInputContainer > input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 0.4rem;
+}
+.searchLoadMoreBtnContainer{
+  display: flex;
+  margin: 10px 0;
+  justify-content: center;
+}
+@media screen and (min-width: 1200px){
+  .row {
+    flex-direction: row;
+  }
+  .actualTreatment {
+    width: 50%;
+  }
+   
+  .containerMedicBackground {
+    width: 60%;
+  }
+}
+.actualTreatmentHeaderDetails > div {
+  display: flex;
+  flex-direction: column;
+}
+.actualTreatmentDescription {
+  margin: 10px 0;
+}
+.medicBackgroundItemFooterList {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.treatmentMedicine{
+  border: 1px solid #9cd45b60;
+  background-color: #9cd45b10;
+  font-weight: 500;
+  color: #557035;
+  border-radius: 4px;
+  padding: 4px 6px;
+ }
+ .treatmentMedicineBottom{
+   font-size: 14px;
+ }
 
 @media screen and (min-width: 868px){
   .doctorAttendingFooterDetailsExamsImgContainer > img {
@@ -341,14 +396,8 @@
     padding: 20px;
     flex-direction: row;
   }
-  .actualTreatment {
-    width: 40%;
-  }
   .row {
     flex-direction: row;
-  }
-  .containerMedicBackground {
-    width: 60%;
   }
   .doctorAttendingContainer {
     width: 50%;

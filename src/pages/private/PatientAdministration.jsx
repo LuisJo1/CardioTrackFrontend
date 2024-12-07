@@ -1,19 +1,76 @@
 // import { useState } from "react";
 
 import medicineImg from "../../assets/images/medicine.png";
-// import medicExamImg from "../../assets/images/medic-exam.png";
-// import doctorImg from "../../assets/images/doctor.png";
 import medicBackgroundImg from "../../assets/images/medic-background.png";
 import styles from "./styles/PatientAdministration.module.css";
 import "../../App.css";
 import imgPerfil from "../../assets/images/perfil-1.jpg";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import AddTreatmentForm from "./AddTreatmentForm";
 import AddExamForm from "./AddExamForm";
+import useLogout from "../../hooks/useLogout";
+import { useNavigate, useParams } from "react-router-dom";
+import { AuthContext } from "../../routes/AuthContext";
+import useGetPatientById from "../../hooks/useGetPatientById";
+import useGetTreatmentsWithFilters from "../../hooks/useGetTreatmentsWithFilters";
+import { MoonLoader } from "react-spinners";
+import useIsOnMobile from "../../hooks/useIsOnMobile";
+import useGetActualTreatment from "../../hooks/useGetActualTreatment";
 
 const PatientAdministration = () => {
+  const getPatientByIdHook = useGetPatientById();
+  const getPatientTreatmentsHook = useGetTreatmentsWithFilters();
+  const actualTreatmentHook = useGetActualTreatment();
+  const [patient, setPatient] = useState(null);
+  const [patientTreatmentSearchTerm, setPatientTreatmentSearchTerm] =
+    useState("");
+  const { isOnMobile } = useIsOnMobile();
   const [currentSection, setCurrentSection] = useState(0);
-
+  const params = useParams();
+  const context = useContext(AuthContext);
+  const user = context.user;
+  const [actualTreatmentPayload, setActualTreatmentPayload] = useState({
+    getLatest: true,
+    patientId: !isNaN(Number(params.id)) ? Number(params.id) : 0
+  });
+  const [patientTreatmentsPayload, setPatientTreatmentsPayload] = useState({
+    sliceIndex: 1,
+    sliceSize: 1,
+    examId: 0,
+    patientId: !isNaN(Number(params.id)) ? Number(params.id) : 0,
+    getLatest: false,
+    treatmentId: 0
+  });
+  const navigate = useNavigate();
+  const { logout } = useLogout();
+  useEffect(() => {
+    actualTreatmentHook.getActualTreatment(actualTreatmentPayload);
+  }, []);
+  useEffect(() => {
+    if (params.id) {
+      getPatientByIdHook.getPatientById(Number(params.id));
+    }
+  }, [params]);
+  useEffect(() => {
+    if (!getPatientByIdHook.isLoading && getPatientByIdHook.success) {
+      setPatient(getPatientByIdHook.data);
+    } else {
+      setPatient(null);
+    }
+  }, [getPatientByIdHook.isLoading]);
+  useEffect(() => {
+    if (patientTreatmentsPayload.sliceIndex > 1) {
+      getPatientTreatmentsHook.getTreatmentsWithFilters(
+        patientTreatmentsPayload,
+        true
+      );
+    } else {
+      getPatientTreatmentsHook.getTreatmentsWithFilters(
+        patientTreatmentsPayload,
+        false
+      );
+    }
+  }, [patientTreatmentsPayload]);
   return (
     <>
       <div className={styles.containerProfile}>
@@ -26,35 +83,66 @@ const PatientAdministration = () => {
           <div className={styles.containerPersonalData}>
             <h1 className={styles.titlePersonalData}>Datos Personales</h1>
             <h2 className={styles.namePersonalData}>
-              Theophrastus Aeroulus Von
+              {`${user?.doctor.names} ${user?.doctor.surnames}`}
             </h2>
             <h3>
               <strong className={styles.labelPersonalData}>
                 Especialidad:
               </strong>{" "}
-              Cardiólogo
+              {user?.doctor.specialty}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>C.I:</strong>{" "}
-              22455676
+              {user?.doctor.ci}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>Teléfono:</strong>{" "}
-              123456789
+              {user?.doctor.phoneNumber}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>Email:</strong>{" "}
-              Cardiologo@gmail.com
+              {user?.email}
             </h3>
           </div>
           <div className={styles.footerPersonalData}>
-            <button className={"button-white"}>Cerrar sesión</button>
+            <button
+              className={"button-white"}
+              onClick={() => {
+                logout();
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
         <div className={styles.mainPanel}>
           <div className={styles.helloMainPanel}>
-            <div>Datos del paciente Oscar Gonzales</div>
+            <div className={styles.helloMainPanelTop}>
+              {isOnMobile && (
+                <button
+                  className="button-white btn button-sm"
+                  onClick={() => {
+                    navigate("/dashboard");
+                  }}
+                >
+                  <i className="bi bi-arrow-left-square"></i>
+                </button>
+              )}
+              Datos del paciente{" "}
+              {`${patient?.names ?? ""} ${patient?.surnames ?? ""}`}
+            </div>
             <div className={styles.helloMainPanelButtonsContainer}>
+              {!isOnMobile && (
+                <button
+                  className="button-white btn"
+                  onClick={() => {
+                    navigate("/dashboard");
+                  }}
+                >
+                  <i className="bi bi-arrow-left-square"></i>
+                  Volver al panel
+                </button>
+              )}
               <button
                 className="button-green btn"
                 onClick={() => {
@@ -81,22 +169,25 @@ const PatientAdministration = () => {
             </div>
             <div className={styles.mobilePersonalDataHeader}>
               <h4>Mis datos personales</h4>
-              <button className={styles.mobilePersonalDataLogoutBtn}>
+              <button
+                className={styles.mobilePersonalDataLogoutBtn}
+                onClick={() => {
+                  logout();
+                }}
+              >
                 Cerrar sesión
               </button>
             </div>
             <div className={styles.mobilePersonalDataDetails}>
-              <h5>Oscar Gonzales</h5>
-              <h6>oscargonazles@gmail.com</h6>
+              <h5>{`${user?.doctor.names} ${user?.doctor.surnames}`}</h5>
+              <h6>{user?.email}</h6>
               <div>
                 <strong>CI:</strong>
-                123456789
+                {user?.doctor.ci}
               </div>
               <div>
-                <strong>Genero:</strong>M
-              </div>
-              <div>
-                <strong>Edad:</strong>28
+                <strong>Especialidad:</strong>
+                {user?.doctor.specialty}
               </div>
             </div>
           </div>
@@ -111,62 +202,91 @@ const PatientAdministration = () => {
                 </div>
                 <div style={{ padding: "8px" }}>
                   <div className={styles.actualTreatmentHeader}>
-                    <h4>Tratamiento #1</h4>
-                    <div className={styles.actualTreatmentHeaderDetails}>
-                      <div>
-                        <strong style={{ marginRight: "4px", fontWeight: 600 }}>
-                          Duración:
-                        </strong>
-                        6 semanas
-                      </div>
-                      <div>
-                        <strong className={styles.label}>Desde el</strong>{" "}
-                        11/12/2024
-                      </div>
-                      <div>
-                        <strong className={styles.label}>Hasta el</strong>{" "}
-                        11/12/2024
-                      </div>
-                    </div>
+                    {actualTreatmentHook.data ? (
+                      <>
+                        <h4>Tratamiento #{actualTreatmentHook.data?.id}</h4>
+                        <div className={styles.actualTreatmentHeaderDetails}>
+                          <div>
+                            <strong
+                              style={{ marginRight: "4px", fontWeight: 600 }}
+                            >
+                              Duración:
+                            </strong>
+                            {`${actualTreatmentHook.data?.duration} ${
+                              actualTreatmentPayload.data?.durationParameter ===
+                              "week"
+                                ? "semanas"
+                                : "días"
+                            }`}
+                          </div>
+                          <div>
+                            <strong className={styles.label}>Desde el</strong>{" "}
+                            {new Date(
+                              actualTreatmentHook.data?.treatmentStartDate ?? ""
+                            ).toLocaleDateString()}
+                          </div>
+                          <div>
+                            <strong className={styles.label}>Hasta el</strong>{" "}
+                            {new Date(
+                              actualTreatmentHook.data?.treatmentEndDate ?? ""
+                            ).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <h4>Sin tratamiento actual</h4>
+                      </>
+                    )}
+                  </div>
+                  <div className={styles.actualTreatmentDescription}>
+                    <h4
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: 500,
+                        opacity: ".7"
+                      }}
+                    >
+                      Descripción
+                    </h4>
+                    <div>{actualTreatmentHook.data?.description}</div>
                   </div>
                   <div className={styles.actualTreatmentMedicinesContainer}>
-                    <h4>Medicamentos</h4>
-                    <table className={styles.actualTreatmentMedicinesTable}>
-                      <thead>
-                        <tr>
-                          <th>Nombre</th>
-                          <th>Tomar cada</th>
-                          <th>Durante</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>Acetaminofen</td>
-                          <td>8 horas</td>
-                          <td>7 días</td>
-                        </tr>
-                        <tr>
-                          <td>Quetoprofeno</td>
-                          <td>12 horas</td>
-                          <td>14 días</td>
-                        </tr>
-                        <tr>
-                          <td>Quetoprofeno</td>
-                          <td>12 horas</td>
-                          <td>14 días</td>
-                        </tr>
-                        <tr>
-                          <td>Quetoprofeno</td>
-                          <td>12 horas</td>
-                          <td>14 días</td>
-                        </tr>
-                        <tr>
-                          <td>Quetoprofeno</td>
-                          <td>12 horas</td>
-                          <td>14 días</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    {actualTreatmentHook.data ? (
+                      <>
+                        <h4>Medicamentos</h4>
+                        <table className={styles.actualTreatmentMedicinesTable}>
+                          <thead>
+                            <tr>
+                              <th>Nombre</th>
+                              <th>Tomar cada</th>
+                              <th>Durante</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {actualTreatmentHook.data?.treatmentMedicines?.map(
+                              (tm) => (
+                                <tr key={tm.medicineName}>
+                                  <td>{tm.medicineName}</td>
+                                  <td>
+                                    {tm.takeEvery}{" "}
+                                    {tm.takeEvery > 1 ? "horas" : "hora"}
+                                  </td>
+                                  <td>
+                                    {tm.duration}{" "}
+                                    {tm.durationParameter === "week"
+                                      ? "semanas"
+                                      : "días"}
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                      </>
+                    ) : (
+                      <></>
+                    )}
                   </div>
                 </div>
               </div>
@@ -177,95 +297,170 @@ const PatientAdministration = () => {
                     <img src={medicBackgroundImg} />
                   </div>
                 </div>
-                <ul className={styles.listMedicBackground}>
-                  <li className={styles.medicBackGroundListItem}>
-                    <div>
-                      <div className={styles.medicBackgroundItemHeader}>
-                        <h4>Tratamiento #2</h4>
-                        <div className={styles.medicBackgroundItemHeaderDoc}>
-                          <strong>Doctor(a):</strong> Theoprhastus Von Hohenheim
-                        </div>
-                        <div
-                          className={styles.actualTreatmentHeaderDetails}
-                          style={{ fontSize: "15px" }}
+                <div className={styles.searchPatientFooter}>
+                  <div className={styles.searchPatientSearchInputContainer}>
+                    <input
+                      name="patientTerm"
+                      // ref={doctorPatientsSearchInput}
+                      placeholder="Buscar por ID..."
+                      type="number"
+                      onChange={(ev) => {
+                        setPatientTreatmentSearchTerm(Number(ev.target.value));
+                      }}
+                    />
+                    <button
+                      className={`button-primary button-sm ${
+                        getPatientTreatmentsHook.isLoading ? "loading" : ""
+                      }`}
+                      disabled={getPatientTreatmentsHook.isLoading}
+                      style={{ fontSize: "18px" }}
+                      onClick={() => {
+                        setPatientTreatmentsPayload((prev) => ({
+                          ...prev,
+                          sliceIndex: 1,
+                          treatmentId: patientTreatmentSearchTerm
+                        }));
+                      }}
+                    >
+                      Buscar
+                      <MoonLoader
+                        color="#fff"
+                        loading={getPatientTreatmentsHook.isLoading}
+                        size={16}
+                      />
+                    </button>
+                  </div>
+                  <div className={styles.searchPatientResultsContainer}>
+                    <ul className={styles.listMedicBackground}>
+                      {!getPatientTreatmentsHook.isLoading &&
+                        getPatientTreatmentsHook.success &&
+                        getPatientTreatmentsHook.data.count == 0 && (
+                          <div
+                            style={{
+                              textAlign: "center",
+                              fontSize: "18px",
+                              fontWeight: "500",
+                              margin: "10px 0"
+                            }}
+                          >
+                            No hay resultados
+                          </div>
+                        )}
+                      {getPatientTreatmentsHook.data?.results?.map((pt) => (
+                        <li
+                          key={pt?.id}
+                          className={styles.medicBackGroundListItem}
                         >
                           <div>
-                            <strong
-                              style={{ marginRight: "4px", fontWeight: 600 }}
-                            >
-                              Duración:
-                            </strong>
-                            6 semanas
+                            <div className={styles.medicBackgroundItemHeader}>
+                              <h4>Tratamiento #{pt?.id}</h4>
+                              <div
+                                className={styles.medicBackgroundItemHeaderDoc}
+                              >
+                                <strong>Doctor(a):</strong> {pt?.doctorName}
+                              </div>
+                              <div
+                                className={styles.actualTreatmentHeaderDetails}
+                                style={{ fontSize: "15px" }}
+                              >
+                                <div>
+                                  <strong
+                                    style={{
+                                      marginRight: "4px",
+                                      fontWeight: 600
+                                    }}
+                                  >
+                                    Duración:
+                                  </strong>
+                                  {`${pt?.duration} ${
+                                    pt?.durationParameter === "week"
+                                      ? "semanas"
+                                      : "días"
+                                  }`}
+                                </div>
+                                <div>
+                                  <strong className={styles.label}>
+                                    Desde el
+                                  </strong>{" "}
+                                  {new Date(
+                                    pt?.treatmentStartDate
+                                  ).toLocaleDateString()}
+                                </div>
+                                <div>
+                                  <strong className={styles.label}>
+                                    Hasta el
+                                  </strong>{" "}
+                                  {new Date(
+                                    pt?.treatmentEndDate
+                                  ).toLocaleDateString()}
+                                </div>
+                              </div>
+                            </div>
+                            <div className={styles.medicBackgroundItemFooter}>
+                              <h4>Medicamentos</h4>
+                              <div
+                                className={styles.medicBackgroundItemFooterList}
+                              >
+                                {pt?.treatmentMedicines?.map((tm) => (
+                                  <div
+                                    className={styles.treatmentMedicine}
+                                    key={tm?.medicineName}
+                                  >
+                                    <div
+                                      className={styles.treatmentMedicineTop}
+                                    >
+                                      {`${tm?.medicineName} / cada ${tm?.takeEvery}hrs`}
+                                    </div>
+                                    <div
+                                      className={styles.treatmentMedicineBottom}
+                                    >
+                                      Durante{" "}
+                                      {`${tm?.duration} ${
+                                        tm.durationParameter === "week"
+                                          ? "semanas"
+                                          : "días"
+                                      }`}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <strong className={styles.label}>Desde el</strong>{" "}
-                            11/12/2024
-                          </div>
-                          <div>
-                            <strong className={styles.label}>Hasta el</strong>{" "}
-                            11/12/2024
-                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                    {!getPatientTreatmentsHook.isLoading &&
+                      getPatientTreatmentsHook.success &&
+                      getPatientTreatmentsHook.data.results.length <
+                        getPatientTreatmentsHook.data.count && (
+                        <div className={styles.searchLoadMoreBtnContainer}>
+                          <button
+                            className="button-white button-sm"
+                            disabled={getPatientTreatmentsHook.isLoading}
+                            onClick={() => {
+                              setPatientTreatmentsPayload((prev) => ({
+                                ...prev,
+                                sliceIndex: prev.sliceIndex + 1
+                              }));
+                            }}
+                          >
+                            Cargar más
+                          </button>
                         </div>
-                      </div>
-                      <div className={styles.medicBackgroundItemFooter}>
-                        <h4>Medicamentos</h4>
-                        <div className={styles.medicBackgroundItemFooterList}>
-                          Acetaminofen cada 8hrs, Medicina cada 2hrs, Medicina
-                          cada 3hrs
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                  <li className={styles.medicBackGroundListItem}>
-                    <div>
-                      <div className={styles.medicBackgroundItemHeader}>
-                        <h4>Tratamiento #2</h4>
-                        <div className={styles.medicBackgroundItemHeaderDoc}>
-                          <strong>Doctor(a):</strong> Theoprhastus Von Hohenheim
-                        </div>
-                        <div
-                          className={styles.actualTreatmentHeaderDetails}
-                          style={{ fontSize: "15px" }}
-                        >
-                          <div>
-                            <strong
-                              style={{ marginRight: "4px", fontWeight: 600 }}
-                            >
-                              Duración:
-                            </strong>
-                            6 semanas
-                          </div>
-                          <div>
-                            <strong className={styles.label}>Desde el</strong>{" "}
-                            11/12/2024
-                          </div>
-                          <div>
-                            <strong className={styles.label}>Hasta el</strong>{" "}
-                            11/12/2024
-                          </div>
-                        </div>
-                      </div>
-                      <div className={styles.medicBackgroundItemFooter}>
-                        <h4>Medicamentos</h4>
-                        <div className={styles.medicBackgroundItemFooterList}>
-                          Acetaminofen cada 8hrs, Medicina cada 2hrs, Medicina
-                          cada 3hrs
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
+                      )}
+                  </div>
+                </div>
               </div>
             </div>
           )}
           {currentSection === 1 && (
             <div className={styles.row}>
-              <AddTreatmentForm />
+              <AddTreatmentForm patient={patient} doctor={user} />
             </div>
           )}
           {currentSection === 2 && (
             <div className={styles.row}>
-              <AddExamForm />
+              <AddExamForm patient={patient} />
             </div>
           )}
         </div>

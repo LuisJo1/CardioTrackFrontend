@@ -1,35 +1,108 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import styles from "./styles/ProfileDoctor.module.css";
 import patientImg from "../../assets/images/patient.png";
 import patientListImg from "../../assets/images/patient-list.png";
 import imgPerfil from "../../assets/images/perfil-1.jpg";
-import { useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useEffect } from "react";
 import Swal from "sweetalert2";
+import useLogout from "../../hooks/useLogout";
+import { AuthContext } from "../../routes/AuthContext";
+import useGetPatientsWithFilters from "../../hooks/useGetPatientsWithFilters";
+import { MoonLoader } from "react-spinners";
+import useGetDoctorPatientsWithFilters from "../../hooks/useGetDoctorPatientsWithFilters";
+import useAddDoctorPatient from "../../hooks/useAddDoctorPatient";
+import { useNavigate } from "react-router-dom";
 
 const ProfileDoctor = () => {
+  const context = useContext(AuthContext);
+  const user = context.user;
+  const [doctorPatientsPayload, setDoctorPatientsPayload] = useState({
+    sliceIndex: 1,
+    sliceSize: 30,
+    patientFullName: ""
+  });
+  const doctorPatientsHook = useGetDoctorPatientsWithFilters();
+  const addDoctorPatientHook = useAddDoctorPatient();
+  const [payload, setPayload] = useState({
+    sliceIndex: 1,
+    sliceSize: 1,
+    searchTerm: "",
+    isBeingEvaluated: false
+  });
+  const { getPatientsWithFilters, isLoading, data, success } =
+    useGetPatientsWithFilters();
+  const { logout } = useLogout();
+  const patientsSearchInput = useRef(null);
+  const doctorPatientsSearchInput = useRef(null);
+  const [callByScroll, setCallByScroll] = useState(false);
   const [isAddPatientModalOpen, setIsAddPatientModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const navigate = useNavigate();
   useEffect(() => {
     if (isAddPatientModalOpen) {
       Swal.fire({
         title: "¿Estás seguro de añadir este paciente?",
         html: `
         <div>
-        <div>Añadirás al paciente Antonin Artaud</div>
-        <div><strong style="font-weight: 600;">CI:</strong>123456789</div>
+        <div>Añadirás al paciente: ${selectedPatient.names} ${selectedPatient.surnames}</div>
+        <div><strong style="font-weight: 600;">CI:</strong>${selectedPatient.ci}</div>
         </div>
         `,
         confirmButtonText: "Sí, añadir paciente",
-        cancelButtonTextL: "No, cancelar",
+        cancelButtonText: "No, cancelar",
         showCancelButton: true
       }).then((resp) => {
         if (resp.isConfirmed) {
-          alert("Añadido");
+          addDoctorPatientHook.addDoctorPatient(selectedPatient.id);
         } else {
+          setSelectedPatient(null);
           setIsAddPatientModalOpen(false);
         }
       });
     }
   }, [isAddPatientModalOpen]);
+  useEffect(() => {
+    if (doctorPatientsPayload.sliceIndex > 1) {
+      doctorPatientsHook.getDoctorPatientsWithFilters(
+        doctorPatientsPayload,
+        true
+      );
+    } else {
+      doctorPatientsHook.getDoctorPatientsWithFilters(
+        doctorPatientsPayload,
+        false
+      );
+    }
+  }, [doctorPatientsPayload]);
+  useEffect(() => {
+    if (payload.sliceIndex > 1) {
+      getPatientsWithFilters(payload, true);
+    } else {
+      getPatientsWithFilters(payload, false);
+    }
+  }, [payload]);
+  useEffect(() => {
+    if (!addDoctorPatientHook.isLoading && addDoctorPatientHook.success) {
+      Swal.fire({
+        title: "Se ha añadido al paciente a tu lista de pacientes",
+        icon: "success",
+        confirmButtonText: "Ok"
+      }).then((resp) => {
+        if (resp.isConfirmed) {
+          doctorPatientsHook.getDoctorPatientsWithFilters(
+            doctorPatientsPayload,
+            false
+          );
+          setIsAddPatientModalOpen(false);
+          getPatientsWithFilters(payload, false);
+        } else {
+          setSelectedPatient(null);
+          setIsAddPatientModalOpen(false);
+        }
+      });
+    }
+  }, [addDoctorPatientHook.isLoading, addDoctorPatientHook.success]);
   return (
     <>
       <div className={styles.containerProfile}>
@@ -42,34 +115,43 @@ const ProfileDoctor = () => {
           <div className={styles.containerPersonalData}>
             <h1 className={styles.titlePersonalData}>Datos Personales</h1>
             <h2 className={styles.namePersonalData}>
-              Theophrastus Aeroulus Von
+              {`${user.doctor.names} ${user.doctor.surnames}`}
             </h2>
             <h3>
               <strong className={styles.labelPersonalData}>
                 Especialidad:
               </strong>{" "}
-              Cardiólogo
+              {user.doctor.specialty}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>C.I:</strong>{" "}
-              22455676
+              {user.doctor.ci}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>Teléfono:</strong>{" "}
-              123456789
+              {user.doctor.phoneNumber}
             </h3>
             <h3>
               <strong className={styles.labelPersonalData}>Email:</strong>{" "}
-              Cardiologo@gmail.com
+              {user.email}
             </h3>
           </div>
           <div className={styles.footerPersonalData}>
-            <button className={"button-white"}>Cerrar sesión</button>
+            <button
+              className={"button-white"}
+              onClick={() => {
+                logout();
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
         <div className={styles.mainPanel}>
           <div className={styles.helloMainPanel}>
-            Bienvenido, Theophrastus Aeroulus Von
+            Bienvenid{user.doctor.genre === "F" ? "a" : "o"}
+            {", "}
+            {`${user.doctor.names} ${user.doctor.surnames}`}
           </div>
           <div className={styles.mobilePersonalDataContainer}>
             <div className={styles.mobilePersonalDataImgContainer}>
@@ -77,19 +159,29 @@ const ProfileDoctor = () => {
             </div>
             <div className={styles.mobilePersonalDataHeader}>
               <h4>Mis datos personales</h4>
-              <button className={styles.mobilePersonalDataLogoutBtn}>
+              <button
+                className={styles.mobilePersonalDataLogoutBtn}
+                onClick={() => {
+                  logout();
+                }}
+              >
                 Cerrar sesión
               </button>
             </div>
             <div className={styles.mobilePersonalDataDetails}>
-              <h5>Theophrastus Aeroulus Von</h5>
-              <h6>cardiologo@gmail.com</h6>
+              <h5>{`${user.doctor.names} ${user.doctor.surnames}`}</h5>
+              <h6>{user.email}</h6>
               <div>
                 <strong>CI:</strong>
-                123456789
+                {user.doctor.ci}
               </div>
               <div>
-                <strong>Especialidad:</strong>Cardiologo
+                <strong>Especialidad:</strong>
+                {user.doctor.specialty}
+              </div>
+              <div>
+                <strong>Teléfono:</strong>
+                {user.doctor.phoneNumber}
               </div>
               {/* <div>
                 <strong>Edad:</strong>28
@@ -108,41 +200,116 @@ const ProfileDoctor = () => {
                 </div>
               </div>
               <div className={styles.searchPatientFooter}>
+                <div className={styles.searchPatientSearchInputContainer}>
+                  <input
+                    type="text"
+                    name="patientTerm"
+                    ref={doctorPatientsSearchInput}
+                    placeholder="Buscar por Nombre..."
+                  />
+                  <button
+                    className={`button-primary button-sm ${
+                      doctorPatientsHook.isLoading ? "loading" : ""
+                    }`}
+                    disabled={doctorPatientsHook.isLoading}
+                    style={{ fontSize: "18px" }}
+                    onClick={() => {
+                      setDoctorPatientsPayload((prev) => ({
+                        ...prev,
+                        sliceIndex: 1,
+                        patientFullName: doctorPatientsSearchInput.current.value
+                      }));
+                    }}
+                  >
+                    Buscar
+                    <MoonLoader
+                      color="#fff"
+                      loading={doctorPatientsHook.isLoading}
+                      size={16}
+                    />
+                  </button>
+                </div>
                 <div className={styles.searchPatientResultsContainer}>
+                  {!doctorPatientsHook.isLoading &&
+                    doctorPatientsHook.success &&
+                    doctorPatientsHook.data?.count == 0 && (
+                      <div
+                        style={{
+                          textAlign: "center",
+                          fontSize: "18px",
+                          fontWeight: "500",
+                          margin: "10px 0"
+                        }}
+                      >
+                        No hay resultados
+                      </div>
+                    )}
                   <ul className={styles.searchPatientList}>
-                    <li className={styles.searchPatientListItem}>
-                      <div>
-                        <div className={styles.searchPatientItemHeader}>
-                          <h4>Antonin Artaud</h4>
-                          <div className={styles.searchPatientItemHeaderDoc}>
-                            <strong>CI:</strong> 123456789
-                          </div>
-                          <div
-                            className={styles.actualTreatmentHeaderDetails}
-                            style={{ fontSize: "15px" }}
-                          >
-                            <div>
-                              <strong
-                                style={{ marginRight: "4px", fontWeight: 600 }}
-                              >
-                                Edad:
-                              </strong>
-                              24 años
+                    {doctorPatientsHook.data?.results?.map((patient) => (
+                      <li
+                        key={patient.patient.id}
+                        className={styles.searchPatientListItem}
+                        onClick={() => {
+                          navigate(`/patient/${patient.patient.id}`);
+                        }}
+                      >
+                        <div>
+                          <div className={styles.searchPatientItemHeader}>
+                            <h4>{`${patient.patient.names} ${patient.patient.surnames}`}</h4>
+                            <div className={styles.searchPatientItemHeaderDoc}>
+                              <strong>CI:</strong> 123456789
                             </div>
-                            <div>
-                              <strong className={styles.label}>
-                                Fecha de nacimiento:
-                              </strong>{" "}
-                              11/12/1920
+                            <div
+                              className={styles.actualTreatmentHeaderDetails}
+                              style={{ fontSize: "15px" }}
+                            >
+                              <div>
+                                <strong
+                                  style={{
+                                    marginRight: "4px",
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  Edad:
+                                </strong>
+                                {patient.patient.age} años
+                              </div>
+                              <div>
+                                <strong className={styles.label}>
+                                  Fecha de nacimiento:
+                                </strong>{" "}
+                                {new Date(
+                                  patient.patient.bornDate
+                                ).toLocaleDateString()}
+                              </div>
                             </div>
-                          </div>
-                          <div className={styles.searchPatientIconContainer}>
-                            <i className="bi bi-arrow-right-square-fill"></i>
+                            <div className={styles.searchPatientIconContainer}>
+                              <i className="bi bi-arrow-right-square-fill"></i>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </li>
+                      </li>
+                    ))}
                   </ul>
+                  {!doctorPatientsHook.isLoading &&
+                    success &&
+                    doctorPatientsHook.data?.results.length <
+                      doctorPatientsHook.data?.count && (
+                      <div className={styles.searchLoadMoreBtnContainer}>
+                        <button
+                          className="button-white button-sm"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setDoctorPatientsPayload((prev) => ({
+                              ...prev,
+                              sliceIndex: prev.sliceIndex + 1
+                            }));
+                          }}
+                        >
+                          Cargar más
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>
@@ -159,54 +326,105 @@ const ProfileDoctor = () => {
                     type="text"
                     name="patientTerm"
                     placeholder="Buscar por CI, Nombre..."
+                    ref={patientsSearchInput}
                   />
                   <button
-                    className="button-primary button-sm"
-                    style={{ fontSize: "18px" }}
+                    className={`button-primary button-sm ${
+                      isLoading ? "loading" : ""
+                    }`}
+                    disabled={isLoading}
+                    style={{ fontSize: "16px" }}
+                    onClick={() => {
+                      setPayload((prev) => ({
+                        ...prev,
+                        sliceIndex: 1,
+                        searchTerm: patientsSearchInput.current.value
+                      }));
+                    }}
                   >
                     Buscar
+                    <MoonLoader color="#fff" loading={isLoading} size={16} />
                   </button>
                 </div>
                 <div className={styles.searchPatientResultsContainer}>
-                  <ul className={styles.searchPatientList}>
-                    <li
-                      className={`${styles.searchPatientListItem}`}
-                      onClick={() => {
-                        setIsAddPatientModalOpen(true);
+                  {!isLoading && success && data.count == 0 && (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        fontSize: "18px",
+                        fontWeight: "500",
+                        margin: "10px 0"
                       }}
                     >
-                      <div>
-                        <div className={styles.searchPatientItemHeader}>
-                          <h4>Antonin Artaud</h4>
-                          <div className={styles.searchPatientItemHeaderDoc}>
-                            <strong>CI:</strong> 123456789
-                          </div>
-                          <div
-                            className={styles.actualTreatmentHeaderDetails}
-                            style={{ fontSize: "15px" }}
-                          >
-                            <div>
-                              <strong
-                                style={{ marginRight: "4px", fontWeight: 600 }}
-                              >
-                                Edad:
-                              </strong>
-                              24 años
+                      No hay resultados
+                    </div>
+                  )}
+                  <ul className={styles.searchPatientList}>
+                    {data?.results?.map((patient) => (
+                      <li
+                        key={patient.id}
+                        className={`${styles.searchPatientListItem}`}
+                        onClick={() => {
+                          setSelectedPatient(patient);
+                          setIsAddPatientModalOpen(true);
+                        }}
+                      >
+                        <div>
+                          <div className={styles.searchPatientItemHeader}>
+                            <h4>{`${patient.names} ${patient.surnames}`}</h4>
+                            <div className={styles.searchPatientItemHeaderDoc}>
+                              <strong>CI:</strong> 123456789
                             </div>
-                            <div>
-                              <strong className={styles.label}>
-                                Fecha de nacimiento:
-                              </strong>{" "}
-                              11/12/1920
+                            <div
+                              className={styles.actualTreatmentHeaderDetails}
+                              style={{ fontSize: "15px" }}
+                            >
+                              <div>
+                                <strong
+                                  style={{
+                                    marginRight: "4px",
+                                    fontWeight: 600
+                                  }}
+                                >
+                                  Edad:
+                                </strong>
+                                {patient.age} años
+                              </div>
+                              <div>
+                                <strong className={styles.label}>
+                                  Fecha de nacimiento:
+                                </strong>{" "}
+                                {new Date(
+                                  patient.bornDate
+                                ).toLocaleDateString()}
+                              </div>
                             </div>
-                          </div>
-                          <div className={styles.searchPatientIconContainer}>
-                            <i className="bi bi-plus-square-fill"></i>
+                            <div className={styles.searchPatientIconContainer}>
+                              <i className="bi bi-plus-square-fill"></i>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </li>
+                      </li>
+                    ))}
                   </ul>
+                  {!isLoading &&
+                    success &&
+                    data.results.length < data.count && (
+                      <div className={styles.searchLoadMoreBtnContainer}>
+                        <button
+                          className="button-white button-sm"
+                          disabled={isLoading}
+                          onClick={() => {
+                            setPayload((prev) => ({
+                              ...prev,
+                              sliceIndex: prev.sliceIndex + 1
+                            }));
+                          }}
+                        >
+                          Cargar más
+                        </button>
+                      </div>
+                    )}
                 </div>
               </div>
             </div>

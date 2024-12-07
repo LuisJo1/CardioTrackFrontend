@@ -1,4 +1,6 @@
-import React, { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
+import { API } from "../api";
+import PropTypes from "prop-types";
 
 // Crear el contexto
 const AuthContext = createContext();
@@ -20,13 +22,35 @@ const useAuth = () => {
 const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    validateUser();
+  }, []);
 
+  async function validateUser() {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API.URL}/authorization/validateUser`, {
+        method: "GET",
+        credentials: "include"
+      });
+      const json = await response.json();
+      setUser(json.data);
+      setIsAuthenticated(true);
+      setLoading(false);
+    } catch (error) {
+      console.log(error);
+      setUser(null);
+      setIsAuthenticated(false);
+      setLoading(false);
+    }
+  }
   // Función para iniciar sesión (ejemplo)
-  const login = (email, password) => {
+  const login = (user) => {
     // Lógica para autenticar al usuario
     // ...
     setIsAuthenticated(true);
-    setUser({ email });
+    setUser(user);
   };
 
   // Función para cerrar sesión (ejemplo)
@@ -34,7 +58,6 @@ const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUser(null);
   };
-  
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
@@ -42,5 +65,8 @@ const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-
+AuthProvider.propTypes = {
+  children: PropTypes.object
+};
+// eslint-disable-next-line react-refresh/only-export-components
 export { AuthContext, AuthProvider, useAuth };

@@ -112,6 +112,11 @@
   font-weight: 600;
   padding-left: 4px;
 }
+.helloMainPanelTop{
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
 .helloMainPanelButtonsContainer {
   margin-top: 16px;
   display: flex;
@@ -125,6 +130,7 @@
   background-color: white;
   border: 1px solid #2b2b2b20;
   border-radius: 10px;
+  width: 100%;
 }
 .actualTreatmentTop{
   border-radius: 10px 10px 0 0;
@@ -189,6 +195,10 @@
   opacity: .74;
   font-weight: 500;
 }
+.actualTreatmentHeaderDetails > div {
+  display: flex;
+  flex-direction: column;
+}
 .medicBackgroundItemHeader {
   padding-bottom: 8px;
   background-color: white;
@@ -216,6 +226,7 @@
   margin-bottom: 4px;
 }
 .containerMedicBackground{
+  width: 100%;
   border: 1px solid #2b2b2b20;
   border-radius: 10px;
   background-color: white;
@@ -332,6 +343,57 @@
 .cardImgContainer > img {
   max-height: 108px;
 }
+.medicBackgroundItemFooterList {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.treatmentMedicine{
+ border: 1px solid #9cd45b60;
+ background-color: #9cd45b10;
+ font-weight: 500;
+ color: #557035;
+ border-radius: 4px;
+ padding: 4px 6px;
+}
+.treatmentMedicineBottom{
+  font-size: 14px;
+}
+.searchPatientFooter {
+  padding: 8px;
+  background-color: white;
+}
+.searchPatientSearchInputContainer{
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.searchPatientSearchInputContainer > input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 0.4rem;
+}
+.searchLoadMoreBtnContainer{
+  display: flex;
+  margin: 10px 0;
+  justify-content: center;
+}
+.actualTreatmentDescription {
+  margin: 10px 0;
+}
+@media screen and (min-width: 1200px){
+  .row {
+    flex-direction: row;
+  }
+  .actualTreatment {
+    width: 50%;
+  }
+   
+  .containerMedicBackground {
+    width: 60%;
+  }
+}
 
 @media screen and (min-width: 868px){
   .doctorAttendingFooterDetailsExamsImgContainer > img {
@@ -350,15 +412,7 @@
     padding: 20px;
     flex-direction: row;
   }
-  .actualTreatment {
-    width: 40%;
-  }
-  .row {
-    flex-direction: row;
-  }
-  .containerMedicBackground {
-    width: 60%;
-  }
+
   .doctorAttendingContainer {
     width: 50%;
   }
