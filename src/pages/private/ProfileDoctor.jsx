@@ -20,13 +20,13 @@ const ProfileDoctor = () => {
   const [doctorPatientsPayload, setDoctorPatientsPayload] = useState({
     sliceIndex: 1,
     sliceSize: 30,
-    patientFullName: ""
+    searchTerm: ""
   });
   const doctorPatientsHook = useGetDoctorPatientsWithFilters();
   const addDoctorPatientHook = useAddDoctorPatient();
   const [payload, setPayload] = useState({
     sliceIndex: 1,
-    sliceSize: 1,
+    sliceSize: 10,
     searchTerm: "",
     isBeingEvaluated: false
   });
@@ -75,13 +75,6 @@ const ProfileDoctor = () => {
       );
     }
   }, [doctorPatientsPayload]);
-  useEffect(() => {
-    if (payload.sliceIndex > 1) {
-      getPatientsWithFilters(payload, true);
-    } else {
-      getPatientsWithFilters(payload, false);
-    }
-  }, [payload]);
   useEffect(() => {
     if (!addDoctorPatientHook.isLoading && addDoctorPatientHook.success) {
       Swal.fire({
@@ -158,7 +151,7 @@ const ProfileDoctor = () => {
               <img src={imgPerfil} />
             </div>
             <div className={styles.mobilePersonalDataHeader}>
-              <h4>Mis datos personales</h4>
+              <h4>Datos personales</h4>
               <button
                 className={styles.mobilePersonalDataLogoutBtn}
                 onClick={() => {
@@ -205,7 +198,7 @@ const ProfileDoctor = () => {
                     type="text"
                     name="patientTerm"
                     ref={doctorPatientsSearchInput}
-                    placeholder="Buscar por Nombre..."
+                    placeholder="Buscar por CI, Nombre..."
                   />
                   <button
                     className={`button-primary button-sm ${
@@ -217,7 +210,7 @@ const ProfileDoctor = () => {
                       setDoctorPatientsPayload((prev) => ({
                         ...prev,
                         sliceIndex: 1,
-                        patientFullName: doctorPatientsSearchInput.current.value
+                        searchTerm: doctorPatientsSearchInput.current.value
                       }));
                     }}
                   >
@@ -333,13 +326,14 @@ const ProfileDoctor = () => {
                       isLoading ? "loading" : ""
                     }`}
                     disabled={isLoading}
-                    style={{ fontSize: "16px" }}
+                    style={{ fontSize: "18px" }}
                     onClick={() => {
-                      setPayload((prev) => ({
-                        ...prev,
+                      setPayload((prev) => ({ ...prev, sliceIndex: 1 }));
+                      getPatientsWithFilters({
+                        ...payload,
                         sliceIndex: 1,
                         searchTerm: patientsSearchInput.current.value
-                      }));
+                      });
                     }}
                   >
                     Buscar
@@ -373,7 +367,7 @@ const ProfileDoctor = () => {
                           <div className={styles.searchPatientItemHeader}>
                             <h4>{`${patient.names} ${patient.surnames}`}</h4>
                             <div className={styles.searchPatientItemHeaderDoc}>
-                              <strong>CI:</strong> 123456789
+                              <strong>CI:</strong> {patient.ci}
                             </div>
                             <div
                               className={styles.actualTreatmentHeaderDetails}
@@ -419,6 +413,13 @@ const ProfileDoctor = () => {
                               ...prev,
                               sliceIndex: prev.sliceIndex + 1
                             }));
+                            getPatientsWithFilters(
+                              {
+                                ...payload,
+                                sliceIndex: payload.sliceIndex + 1
+                              },
+                              true
+                            );
                           }}
                         >
                           Cargar más

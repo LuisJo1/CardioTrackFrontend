@@ -13,17 +13,16 @@ import { useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../../routes/AuthContext";
 import useGetPatientById from "../../hooks/useGetPatientById";
 import useGetTreatmentsWithFilters from "../../hooks/useGetTreatmentsWithFilters";
-import { MoonLoader } from "react-spinners";
 import useIsOnMobile from "../../hooks/useIsOnMobile";
 import useGetActualTreatment from "../../hooks/useGetActualTreatment";
+import usePrint from "../../hooks/usePrint";
 
 const PatientAdministration = () => {
+  const [print] = usePrint();
   const getPatientByIdHook = useGetPatientById();
   const getPatientTreatmentsHook = useGetTreatmentsWithFilters();
   const actualTreatmentHook = useGetActualTreatment();
   const [patient, setPatient] = useState(null);
-  const [patientTreatmentSearchTerm, setPatientTreatmentSearchTerm] =
-    useState("");
   const { isOnMobile } = useIsOnMobile();
   const [currentSection, setCurrentSection] = useState(0);
   const params = useParams();
@@ -35,11 +34,12 @@ const PatientAdministration = () => {
   });
   const [patientTreatmentsPayload, setPatientTreatmentsPayload] = useState({
     sliceIndex: 1,
-    sliceSize: 1,
+    sliceSize: 10,
     examId: 0,
     patientId: !isNaN(Number(params.id)) ? Number(params.id) : 0,
     getLatest: false,
-    treatmentId: 0
+    treatmentId: 0,
+    getAll: true
   });
   const navigate = useNavigate();
   const { logout } = useLogout();
@@ -125,7 +125,7 @@ const PatientAdministration = () => {
                     navigate("/dashboard");
                   }}
                 >
-                  <i className="bi bi-arrow-left-square"></i>
+                  <i className="bi bi-caret-left-fill"></i>
                 </button>
               )}
               Datos del paciente{" "}
@@ -139,7 +139,7 @@ const PatientAdministration = () => {
                     navigate("/dashboard");
                   }}
                 >
-                  <i className="bi bi-arrow-left-square"></i>
+                  <i className="bi bi-caret-left-fill"></i>
                   Volver al panel
                 </button>
               )}
@@ -168,7 +168,7 @@ const PatientAdministration = () => {
               <img src={imgPerfil} />
             </div>
             <div className={styles.mobilePersonalDataHeader}>
-              <h4>Mis datos personales</h4>
+              <h4>Datos personales</h4>
               <button
                 className={styles.mobilePersonalDataLogoutBtn}
                 onClick={() => {
@@ -298,39 +298,28 @@ const PatientAdministration = () => {
                   </div>
                 </div>
                 <div className={styles.searchPatientFooter}>
-                  <div className={styles.searchPatientSearchInputContainer}>
-                    <input
-                      name="patientTerm"
-                      // ref={doctorPatientsSearchInput}
-                      placeholder="Buscar por ID..."
-                      type="number"
-                      onChange={(ev) => {
-                        setPatientTreatmentSearchTerm(Number(ev.target.value));
-                      }}
-                    />
+                  <div
+                    className={styles.searchPatientSearchInputContainer}
+                    style={{ justifyContent: "flex-end" }}
+                  >
                     <button
-                      className={`button-primary button-sm ${
+                      className={`button-green button-sm ${
                         getPatientTreatmentsHook.isLoading ? "loading" : ""
                       }`}
                       disabled={getPatientTreatmentsHook.isLoading}
                       style={{ fontSize: "18px" }}
                       onClick={() => {
-                        setPatientTreatmentsPayload((prev) => ({
-                          ...prev,
-                          sliceIndex: 1,
-                          treatmentId: patientTreatmentSearchTerm
-                        }));
+                        print("medicBackground");
                       }}
                     >
-                      Buscar
-                      <MoonLoader
-                        color="#fff"
-                        loading={getPatientTreatmentsHook.isLoading}
-                        size={16}
-                      />
+                      Imprimir
+                      <i className="bi bi-filetype-pdf"></i>
                     </button>
                   </div>
-                  <div className={styles.searchPatientResultsContainer}>
+                  <div
+                    className={styles.searchPatientResultsContainer}
+                    id="medicBackground"
+                  >
                     <ul className={styles.listMedicBackground}>
                       {!getPatientTreatmentsHook.isLoading &&
                         getPatientTreatmentsHook.success &&
@@ -353,14 +342,16 @@ const PatientAdministration = () => {
                         >
                           <div>
                             <div className={styles.medicBackgroundItemHeader}>
-                              <h4>Tratamiento #{pt?.id}</h4>
+                              <h4 style={{ color: "#010258be" }}>
+                                Tratamiento #{pt?.id}
+                              </h4>
                               <div
-                                className={styles.medicBackgroundItemHeaderDoc}
+                                className={`${styles.medicBackgroundItemHeaderDoc} ItemHeaderTwo`}
                               >
                                 <strong>Doctor(a):</strong> {pt?.doctorName}
                               </div>
                               <div
-                                className={styles.actualTreatmentHeaderDetails}
+                                className={`${styles.actualTreatmentHeaderDetails} headerDetails`}
                                 style={{ fontSize: "15px" }}
                               >
                                 <div>
@@ -397,32 +388,40 @@ const PatientAdministration = () => {
                               </div>
                             </div>
                             <div className={styles.medicBackgroundItemFooter}>
-                              <h4>Medicamentos</h4>
+                              <h4 className="ItemHeaderThree">Medicamentos</h4>
                               <div
                                 className={styles.medicBackgroundItemFooterList}
                               >
-                                {pt?.treatmentMedicines?.map((tm) => (
-                                  <div
-                                    className={styles.treatmentMedicine}
-                                    key={tm?.medicineName}
-                                  >
-                                    <div
-                                      className={styles.treatmentMedicineTop}
-                                    >
-                                      {`${tm?.medicineName} / cada ${tm?.takeEvery}hrs`}
-                                    </div>
-                                    <div
-                                      className={styles.treatmentMedicineBottom}
-                                    >
-                                      Durante{" "}
-                                      {`${tm?.duration} ${
-                                        tm.durationParameter === "week"
-                                          ? "semanas"
-                                          : "días"
-                                      }`}
-                                    </div>
-                                  </div>
-                                ))}
+                                <table
+                                  className={
+                                    styles.actualTreatmentMedicinesTable
+                                  }
+                                >
+                                  <thead>
+                                    <tr>
+                                      <th>Nombre</th>
+                                      <th>Tomar cada</th>
+                                      <th>Durante</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {pt.treatmentMedicines?.map((tm) => (
+                                      <tr key={tm.medicineName}>
+                                        <td>{tm.medicineName}</td>
+                                        <td>
+                                          {tm.takeEvery}{" "}
+                                          {tm.takeEvery > 1 ? "horas" : "hora"}
+                                        </td>
+                                        <td>
+                                          {tm.duration}{" "}
+                                          {tm.durationParameter === "week"
+                                            ? "semanas"
+                                            : "días"}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
                             </div>
                           </div>

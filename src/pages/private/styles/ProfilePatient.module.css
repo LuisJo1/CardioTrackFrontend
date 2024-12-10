@@ -102,6 +102,7 @@
   background-color: #f8f8fb;
   width: 100%;
   display: flex;
+  padding: 10px;
   flex-direction: column;
 }
 .helloMainPanel {
@@ -116,6 +117,8 @@
   background-color: white;
   border: 1px solid #2b2b2b20;
   border-radius: 10px;
+  min-height: 80vh;
+  width: 100%;
 }
 .actualTreatmentTop{
   border-radius: 10px 10px 0 0;
@@ -156,6 +159,8 @@
   margin-top: 10px;
   text-align: left;
   background-color: #afafaf20;
+  max-height: 70vh;
+  overflow-y: auto;
 }
 .actualTreatmentMedicinesTable > thead {  
   font-size: 16px;
@@ -210,6 +215,8 @@
   border: 1px solid #2b2b2b20;
   border-radius: 10px;
   background-color: white;
+  min-height: 80vh;
+  width: 100%;
 }
 .medicBackgroundHeader{
   border-radius: 10px 10px 0 0;
@@ -230,7 +237,8 @@
 .listMedicBackground{
   margin-top: 10px;
   display: flex;
-  max-height: 70vh;
+  max-height: 60vh;
+  min-height: 40vh;
   overflow-y: auto;
   flex-direction: column;
   gap: 10px;
@@ -254,6 +262,7 @@
   border: 1px solid #2b2b2b20;
   border-radius: 10px;
   background-color: white;
+  width: 100%;
 }
 
 .doctorAttendingHeader {
@@ -347,9 +356,6 @@
   .row {
     flex-direction: row;
   }
-  .actualTreatment {
-    width: 50%;
-  }
    
   .containerMedicBackground {
     width: 60%;
@@ -378,8 +384,23 @@
  .treatmentMedicineBottom{
    font-size: 14px;
  }
+.left{
+  flex-direction: column;
+  width: 100%;
+  margin-top: 0px;
+}
 
+@media screen  and (min-width: 1200px){
+  .row {
+    flex-direction: row !important;
+  }
+  .left{
+    flex-direction: column !important;
+    width: 50%;
+  }  
+}
 @media screen and (min-width: 868px){
+  
   .doctorAttendingFooterDetailsExamsImgContainer > img {
     max-height: 54px;
   }
@@ -395,12 +416,6 @@
   .containerProfile {
     padding: 20px;
     flex-direction: row;
-  }
-  .row {
-    flex-direction: row;
-  }
-  .doctorAttendingContainer {
-    width: 50%;
   }
   .card {
     width: 50%;

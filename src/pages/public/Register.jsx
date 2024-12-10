@@ -156,7 +156,7 @@ const Register = () => {
                 Object.values(errors).some((el) => el.length > 0) || isLoading
               }
             >
-              Ingresar
+              Registrarse
             </button>
           </form>
 

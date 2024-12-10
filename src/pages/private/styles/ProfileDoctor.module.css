@@ -87,7 +87,6 @@
 .namePersonalData {
   font-weight: 600;
 }
-
 .labelPersonalData {
   font-weight: 600;
 }
@@ -99,6 +98,7 @@
   background-color: #f8f8fb;
   width: 100%;
   display: flex;
+  padding: 10px;
   flex-direction: column;
 }
 .currentPatientsContainer {
@@ -156,7 +156,8 @@
 .searchPatientList{
   margin-top: 10px;
   display: flex;
-  max-height: 60vh;
+  max-height: 56vh;
+  min-height: 56vh;
   width: 100%;
   overflow-y: auto;
   flex-direction: column;

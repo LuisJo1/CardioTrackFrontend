@@ -34,7 +34,7 @@ const AddTreatmentForm = ({ patient, doctor }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [payload, setPayload] = useState({
     sliceIndex: 1,
-    sliceSize: 1,
+    sliceSize: 10,
     examId: 0,
     doctorId: doctor?.doctor?.id,
     patientId: patient?.id
