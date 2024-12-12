@@ -13,6 +13,7 @@ import { MoonLoader } from "react-spinners";
 import useGetDoctorPatientsWithFilters from "../../hooks/useGetDoctorPatientsWithFilters";
 import useAddDoctorPatient from "../../hooks/useAddDoctorPatient";
 import { useNavigate } from "react-router-dom";
+import useGetExamsWithFilters from "../../hooks/useGetExamsWithFilters";
 
 const ProfileDoctor = () => {
   const context = useContext(AuthContext);

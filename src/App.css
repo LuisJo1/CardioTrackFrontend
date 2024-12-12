@@ -34,6 +34,15 @@
   border-radius: 0.4rem;
   cursor: pointer;
 }
+.button-red {
+  padding: 15px;
+  background-color: #ff000020;
+  color: #ff0000;
+  border: none;
+  outline: 1px solid #ff0000;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
 .button-green {
   padding: 15px;
   background-color: rgb(123, 216, 100);
@@ -63,3 +72,37 @@
 .justify-end {
   justify-content: flex-end !important;
 }
+
+
+.ItemHeaderTwo{
+  font-weight: 600;
+  opacity: .82;
+  font-size: 17px;
+  margin-bottom: 8px;
+  }
+
+  .ItemHeaderThree {
+   font-weight: 600;
+  opacity: .82;
+  font-size: 16px;
+  margin-bottom: 8px;
+  }
+
+  .ItemRow{
+    background-color: #fcfcfc;
+    border-bottom: 1px solid #2b2b2b20;
+    padding: 8px;
+  }
+
+  .detailsRow{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 3px;
+  }
+  @media screen and (min-width: 868px) {
+    .detailsRow {
+      gap: 8px;
+    padding-left: 4px;
+    }
+  }

@@ -4,6 +4,7 @@ import medicineImg from "../../assets/images/medicine.png";
 import medicExamImg from "../../assets/images/medic-exam.png";
 import doctorImg from "../../assets/images/doctor.png";
 import medicBackgroundImg from "../../assets/images/medic-background.png";
+import medicBackgroundRedImg from "../../assets/images/medic-background-red.png";
 import styles from "./styles/ProfilePatient.module.css";
 import "../../App.css";
 import imgPerfil from "../../assets/images/perfil-1.jpg";
@@ -15,19 +16,31 @@ import useGetActualTreatment from "../../hooks/useGetActualTreatment";
 import useGetDoctorAttending from "../../hooks/useGetDoctorAttending";
 import usePrint from "../../hooks/usePrint";
 import useGetExamsWithFilters from "../../hooks/useGetExamsWithFilters";
+import ExamItemList from "../../components/ExamItemList";
+import usePatchPatientProfilePic from "../../hooks/usePatchPatientProfilePic";
+import { MoonLoader } from "react-spinners";
+import useDeleteProfilePic from "../../hooks/useDeleteProfilePic";
+import Swal from "sweetalert2";
 
 const ProfilePatient = () => {
+  const patchPatientProfilePic = usePatchPatientProfilePic();
+  const deletePatientProfilePic = useDeleteProfilePic();
+  const [profileImgSelected, setProfileImgSelected] = useState(null);
   const { logout } = useLogout();
   const [print] = usePrint();
   const context = useContext(AuthContext);
   const user = context.user;
   const doctorAttendingHook = useGetDoctorAttending();
   const actualTreatmentHook = useGetActualTreatment();
+  const examsHook = useGetExamsWithFilters();
+  const [examsPayload, setExamsPayload] = useState({
+    getAll: true,
+    patientId: user?.patient?.id
+  });
   const [actualTreatmentPayload, setActualTreatmentPayload] = useState({
     getLatest: true,
     patientId: user?.patient?.id
   });
-  const examsHook = useGetExamsWithFilters();
   const getPatientTreatmentsHook = useGetTreatmentsWithFilters();
   const [patientTreatmentsPayload, setPatientTreatmentsPayload] = useState({
     sliceIndex: 1,
@@ -41,6 +54,7 @@ const ProfilePatient = () => {
       patientId: user?.patient?.id
     });
     actualTreatmentHook.getActualTreatment(actualTreatmentPayload);
+    examsHook.getExamsWithFilters(examsPayload);
   }, []);
   useEffect(() => {
     if (patientTreatmentsPayload.sliceIndex > 1) {
@@ -55,14 +69,146 @@ const ProfilePatient = () => {
       );
     }
   }, [patientTreatmentsPayload]);
+  useEffect(() => {
+    if (!patchPatientProfilePic.isLoading && patchPatientProfilePic.success) {
+      context.setPatientProfilePic(patchPatientProfilePic.data);
+      setProfileImgSelected(null);
+      Swal.fire({
+        title: "Tu foto de perfil ha sido actualizada",
+        icon: "success",
+        confirmButtonText: "Ok"
+      });
+    }
+  }, [patchPatientProfilePic.isLoading]);
+  useEffect(() => {
+    if (!deletePatientProfilePic.isLoading && deletePatientProfilePic.success) {
+      Swal.fire({
+        title: "Tu foto de perfil ha sido eliminada",
+        icon: "success",
+        confirmButtonText: "Ok"
+      })
+        .then(() => {
+          setProfileImgSelected(null);
+          context.setPatientProfilePic("");
+        })
+        .catch(() => {
+          setProfileImgSelected(null);
+          context.setPatientProfilePic("");
+        });
+    }
+  }, [deletePatientProfilePic.isLoading]);
   return (
     <>
       <div className={styles.containerProfile}>
         <div
           className={`${styles.containerCardDatePerson} ${styles.showOnDesktop}`}
         >
-          <div>
-            <img src={imgPerfil} className={styles.imgProfile} />
+          <div className={styles.profileImgContainer}>
+            <div className={styles.profileImgControls}>
+              {profileImgSelected == null && (
+                <div className={styles.profileImgControlsRow}>
+                  <label
+                    type="file"
+                    className="button-white button-sm"
+                    htmlFor="profileImgPic"
+                  >
+                    <i className="bi bi-pen"></i>
+                  </label>
+                  {user.patient.profileImgUrl !== "" && (
+                    <label
+                      type="file"
+                      className="button-red button-sm"
+                      onClick={() => {
+                        deletePatientProfilePic.deleteProfilePic(
+                          user.patient.id
+                        );
+                      }}
+                    >
+                      {deletePatientProfilePic.isLoading ? (
+                        <MoonLoader
+                          color="#fff"
+                          loading={patchPatientProfilePic.isLoading}
+                          size={16}
+                        />
+                      ) : (
+                        <i className="bi bi-x-lg"></i>
+                      )}
+                    </label>
+                  )}
+                </div>
+              )}
+              {profileImgSelected != null ? (
+                <div className={styles.profileImgControlsRow}>
+                  <label
+                    className="button-white button-sm"
+                    onClick={() => {
+                      setProfileImgSelected(null);
+                    }}
+                  >
+                    <i className="bi bi-arrow-counterclockwise"></i>
+                  </label>
+                  <button
+                    className="button-primary button-sm"
+                    style={{ fontSize: "18px" }}
+                    disabled={patchPatientProfilePic.isLoading}
+                    onClick={() => {
+                      patchPatientProfilePic.patchPatientProfilePic({
+                        file: profileImgSelected,
+                        patientId: user.patient.id
+                      });
+                    }}
+                  >
+                    {patchPatientProfilePic.isLoading ? (
+                      <>
+                        <MoonLoader
+                          color="#fff"
+                          loading={patchPatientProfilePic.isLoading}
+                          size={16}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-floppy"></i>
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <></>
+              )}
+              <input
+                type="file"
+                accept=".jpg,.jpeg,.png"
+                id="profileImgPic"
+                style={{ display: "none" }}
+                onChange={(ev) => {
+                  setProfileImgSelected(ev.target.files.item(0));
+                }}
+              />
+            </div>
+            {user?.patient.profileImgUrl.length === 0 ? (
+              <>
+                <img
+                  src={
+                    profileImgSelected !== null
+                      ? URL.createObjectURL(profileImgSelected)
+                      : imgPerfil
+                  }
+                  className={styles.imgProfile}
+                />
+              </>
+            ) : (
+              <>
+                <img
+                  src={
+                    profileImgSelected !== null
+                      ? URL.createObjectURL(profileImgSelected)
+                      : user.patient.profileImgUrl
+                  }
+                  className={styles.imgProfile}
+                />
+              </>
+            )}
           </div>
           <div className={styles.containerPersonalData}>
             <h1 className={styles.titlePersonalData}>Datos Personales</h1>
@@ -100,7 +246,111 @@ const ProfilePatient = () => {
           </div>
           <div className={styles.mobilePersonalDataContainer}>
             <div className={styles.mobilePersonalDataImgContainer}>
-              <img src={imgPerfil} />
+              <div className={styles.profileImgControls}>
+                {profileImgSelected == null && (
+                  <div className={styles.profileImgControlsRow}>
+                    <label
+                      type="file"
+                      className="button-white button-sm"
+                      htmlFor="profileImgPic"
+                    >
+                      <i className="bi bi-pen"></i>
+                    </label>
+                    {user.patient.profileImgUrl !== "" && (
+                      <label
+                        type="file"
+                        className="button-red button-sm"
+                        onClick={() => {
+                          deletePatientProfilePic.deleteProfilePic(
+                            user.patient.id
+                          );
+                        }}
+                      >
+                        {deletePatientProfilePic.isLoading ? (
+                          <MoonLoader
+                            color="#fff"
+                            loading={patchPatientProfilePic.isLoading}
+                            size={16}
+                          />
+                        ) : (
+                          <i className="bi bi-x-lg"></i>
+                        )}
+                      </label>
+                    )}
+                  </div>
+                )}
+                {profileImgSelected != null ? (
+                  <div className={styles.profileImgControlsRow}>
+                    <label
+                      className="button-white button-sm"
+                      onClick={() => {
+                        setProfileImgSelected(null);
+                      }}
+                    >
+                      <i className="bi bi-arrow-counterclockwise"></i>
+                    </label>
+                    <button
+                      className="button-primary button-sm"
+                      style={{ fontSize: "18px" }}
+                      disabled={patchPatientProfilePic.isLoading}
+                      onClick={() => {
+                        patchPatientProfilePic.patchPatientProfilePic({
+                          file: profileImgSelected,
+                          patientId: user.patient.id
+                        });
+                      }}
+                    >
+                      {patchPatientProfilePic.isLoading ? (
+                        <>
+                          <MoonLoader
+                            color="#fff"
+                            loading={patchPatientProfilePic.isLoading}
+                            size={16}
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <i className="bi bi-floppy"></i>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  <></>
+                )}
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png"
+                  id="profileImgPic"
+                  style={{ display: "none" }}
+                  onChange={(ev) => {
+                    setProfileImgSelected(ev.target.files.item(0));
+                  }}
+                />
+              </div>
+              {user?.patient.profileImgUrl.length === 0 ? (
+                <>
+                  <img
+                    src={
+                      profileImgSelected !== null
+                        ? URL.createObjectURL(profileImgSelected)
+                        : imgPerfil
+                    }
+                    className={styles.imgProfile}
+                  />
+                </>
+              ) : (
+                <>
+                  <img
+                    src={
+                      profileImgSelected !== null
+                        ? URL.createObjectURL(profileImgSelected)
+                        : user.patient.profileImgUrl
+                    }
+                    className={styles.imgProfile}
+                  />
+                </>
+              )}
             </div>
             <div className={styles.mobilePersonalDataHeader}>
               <h4>Mis datos personales</h4>
@@ -429,12 +679,18 @@ const ProfilePatient = () => {
               </div>
             </div>
           </div>
-          {/*  <div className={styles.row}>
-            <div className={styles.containerMedicBackground}>
-              <div className={styles.medicBackgroundHeader}>
-                <h4>Historial médico</h4>
+          <div className={styles.row} style={{ with: "100%" }}>
+            <div
+              className={styles.containerMedicBackground}
+              style={{ width: "100%" }}
+            >
+              <div
+                className={styles.medicBackgroundHeader}
+                style={{ backgroundColor: "#ff88aa40" }}
+              >
+                <h4 style={{ color: "#FE2121" }}>Exámenes medicos</h4>
                 <div className={styles.medicBackgroundHeaderImgContainer}>
-                  <img src={medicBackgroundImg} />
+                  <img src={medicBackgroundRedImg} />
                 </div>
               </div>
               <div className={styles.searchPatientFooter}>
@@ -449,7 +705,7 @@ const ProfilePatient = () => {
                     disabled={getPatientTreatmentsHook.isLoading}
                     style={{ fontSize: "18px" }}
                     onClick={() => {
-                      print("medicBackground");
+                      print("examBackground");
                     }}
                   >
                     Imprimir
@@ -458,12 +714,15 @@ const ProfilePatient = () => {
                 </div>
                 <div
                   className={styles.searchPatientResultsContainer}
-                  id="medicBackground"
+                  id="examBackground"
                 >
-                  <ul className={styles.listMedicBackground}>
-                    {!getPatientTreatmentsHook.isLoading &&
-                      getPatientTreatmentsHook.success &&
-                      getPatientTreatmentsHook.data.count == 0 && (
+                  <ul
+                    className={styles.listMedicBackground}
+                    style={{ maxHeight: "90vh" }}
+                  >
+                    {!examsHook.isLoading &&
+                      examsHook.success &&
+                      examsHook.data.count == 0 && (
                         <div
                           style={{
                             textAlign: "center",
@@ -475,105 +734,21 @@ const ProfilePatient = () => {
                           No hay resultados
                         </div>
                       )}
-                    {getPatientTreatmentsHook.data?.results?.map((pt) => (
-                      <li
-                        key={pt?.id}
-                        className={styles.medicBackGroundListItem}
-                      >
-                        <div>
-                          <div className={styles.medicBackgroundItemHeader}>
-                            <h4 style={{ color: "#010258be" }}>
-                              Tratamiento #{pt?.id}
-                            </h4>
-                            <div
-                              className={`${styles.medicBackgroundItemHeaderDoc} ItemHeaderTwo`}
-                            >
-                              <strong>Doctor(a):</strong> {pt?.doctorName}
-                            </div>
-                            <div
-                              className={`${styles.actualTreatmentHeaderDetails} headerDetails`}
-                              style={{ fontSize: "15px" }}
-                            >
-                              <div>
-                                <strong
-                                  style={{
-                                    marginRight: "4px",
-                                    fontWeight: 600
-                                  }}
-                                >
-                                  Duración:
-                                </strong>
-                                {`${pt?.duration} ${
-                                  pt?.durationParameter === "week"
-                                    ? "semanas"
-                                    : "días"
-                                }`}
-                              </div>
-                              <div>
-                                <strong className={styles.label}>
-                                  Desde el
-                                </strong>{" "}
-                                {new Date(
-                                  pt?.treatmentStartDate
-                                ).toLocaleDateString()}
-                              </div>
-                              <div>
-                                <strong className={styles.label}>
-                                  Hasta el
-                                </strong>{" "}
-                                {new Date(
-                                  pt?.treatmentEndDate
-                                ).toLocaleDateString()}
-                              </div>
-                            </div>
-                          </div>
-                          <div className={styles.medicBackgroundItemFooter}>
-                            <h4 className="ItemHeaderThree">Medicamentos</h4>
-                            <div
-                              className={styles.medicBackgroundItemFooterList}
-                            >
-                              <table
-                                className={styles.actualTreatmentMedicinesTable}
-                              >
-                                <thead>
-                                  <tr>
-                                    <th>Nombre</th>
-                                    <th>Tomar cada</th>
-                                    <th>Durante</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {pt.treatmentMedicines?.map((tm) => (
-                                    <tr key={tm.medicineName}>
-                                      <td>{tm.medicineName}</td>
-                                      <td>
-                                        {tm.takeEvery}{" "}
-                                        {tm.takeEvery > 1 ? "horas" : "hora"}
-                                      </td>
-                                      <td>
-                                        {tm.duration}{" "}
-                                        {tm.durationParameter === "week"
-                                          ? "semanas"
-                                          : "días"}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
+                    {examsHook.data?.results?.map((e) => (
+                      <ExamItemList
+                        exam={e}
+                        patient={user.patient}
+                        key={e.id}
+                      />
                     ))}
                   </ul>
-                  {!getPatientTreatmentsHook.isLoading &&
-                    getPatientTreatmentsHook.success &&
-                    getPatientTreatmentsHook.data.results.length <
-                      getPatientTreatmentsHook.data.count && (
+                  {!examsHook.isLoading &&
+                    examsHook.success &&
+                    examsHook.data.results.length < examsHook.data.count && (
                       <div className={styles.searchLoadMoreBtnContainer}>
                         <button
                           className="button-white button-sm"
-                          disabled={getPatientTreatmentsHook.isLoading}
+                          disabled={examsHook.isLoading}
                           onClick={() => {
                             setPatientTreatmentsPayload((prev) => ({
                               ...prev,
@@ -589,7 +764,6 @@ const ProfilePatient = () => {
               </div>
             </div>
           </div>
-           */}
         </div>
       </div>
     </>

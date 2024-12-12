@@ -35,6 +35,7 @@ function usePrint() {
   justify-content: space-between;
   opacity: .72;
   font-weight: 500;
+  gap: 8px
 }
     .medicBackgroundItemHeader {
   padding-bottom: 8px;
@@ -79,7 +80,18 @@ td {
   border-right: 1px solid #2b2b2b20;
   border-left: 1px solid #2b2b2b20;
 }
+     .ItemRow{
+    background-color: #fcfcfc;
+    border-bottom: 1px solid #2b2b2b20;
+    padding: 8px;
+  }
 
+   .detailsRow{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-left: 3px;
+  }
     </style>
     </head>
     <body>

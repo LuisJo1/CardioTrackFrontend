@@ -27,6 +27,12 @@ const AuthProvider = ({ children }) => {
     validateUser();
   }, []);
 
+  function setPatientProfilePic(newUrl) {
+    setUser((prev) => ({
+      ...prev,
+      patient: { ...prev.patient, profileImgUrl: newUrl }
+    }));
+  }
   async function validateUser() {
     try {
       setLoading(true);
@@ -60,7 +66,9 @@ const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, user, login, logout, setPatientProfilePic }}
+    >
       {children}
     </AuthContext.Provider>
   );
