@@ -76,7 +76,7 @@ function useRegisterForm() {
       setIsLoading(true)
       const response = await fetch(`${api.URL}/patient/addpatient`, {
         method: "POST",
-        body: JSON.stringify(formValues),
+        body: JSON.stringify({...formValues, bornDate: getDateFormatted(formValues.bornDate)}),
         credentials: "include",
         headers: {"Content-Type": "application/json"}
       });
@@ -131,6 +131,14 @@ function useRegisterForm() {
         ["password"]: "Las contraseñas no coinciden"
       }))
     }
+  }
+
+  function getDateFormatted(date) {
+    const dateObj = new Date(date);
+    const localDate = new Date(dateObj.getTime() + dateObj.getTimezoneOffset() * 60000);
+    const dateFormatted = `${localDate.getFullYear()}/${(localDate.getMonth() + 1).toString().padStart(2, "0")}/${localDate.getDate().toString().padStart(2, "0")}`;
+    console.log(dateFormatted);
+    return dateFormatted;
   }
   return {
     formValues,

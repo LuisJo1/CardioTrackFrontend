@@ -186,7 +186,7 @@ const ProfilePatient = () => {
                 }}
               />
             </div>
-            {user?.patient.profileImgUrl.length === 0 ? (
+            {user?.patient.profileImgUrl?.length === 0 ? (
               <>
                 <img
                   src={
@@ -328,7 +328,7 @@ const ProfilePatient = () => {
                   }}
                 />
               </div>
-              {user?.patient.profileImgUrl.length === 0 ? (
+              {user?.patient.profileImgUrl?.length === 0 ? (
                 <>
                   <img
                     src={

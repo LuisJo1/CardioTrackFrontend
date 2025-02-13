@@ -1,9 +1,10 @@
 const API = {
-  URL: 'http://localhost:5296'
-}
+  URL: "https://cardiobackend.somee.com"
+};
 const Roles = {
   ADMIN: 1,
   DOCTOR: 2,
-  PATIENT: 3
-}
-export {API, Roles}
+  PATIENT: 3,
+  WHOEVER: 4
+};
+export { API, Roles };

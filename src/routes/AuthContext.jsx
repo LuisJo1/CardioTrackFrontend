@@ -20,10 +20,11 @@ const useAuth = () => {
 
 // Componente proveedor del contexto
 const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingUserValidation, setLoading] = useState(true);
   useEffect(() => {
+    console.log(loadingUserValidation);
     validateUser();
   }, []);
 
@@ -41,9 +42,16 @@ const AuthProvider = ({ children }) => {
         credentials: "include"
       });
       const json = await response.json();
-      setUser(json.data);
-      setIsAuthenticated(true);
-      setLoading(false);
+      console.log(json);
+      if (!json.success && json.statusCode !== 200) {
+        setUser(null);
+        setIsAuthenticated(false);
+        setLoading(false);
+      } else {
+        setUser(json.data);
+        setIsAuthenticated(true);
+        setLoading(false);
+      }
     } catch (error) {
       console.log(error);
       setUser(null);
@@ -67,7 +75,14 @@ const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, login, logout, setPatientProfilePic }}
+      value={{
+        isAuthenticated,
+        user,
+        login,
+        logout,
+        setPatientProfilePic,
+        loadingUserValidation
+      }}
     >
       {children}
     </AuthContext.Provider>

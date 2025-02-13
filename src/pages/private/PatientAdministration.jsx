@@ -526,11 +526,7 @@ const PatientAdministration = () => {
                             </div>
                           )}
                         {examsHook.data?.results?.map((e) => (
-                          <ExamItemList
-                            exam={e}
-                            patient={user.patient}
-                            key={e.id}
-                          />
+                          <ExamItemList exam={e} patient={patient} key={e.id} />
                         ))}
                       </ul>
                       {!examsHook.isLoading &&
