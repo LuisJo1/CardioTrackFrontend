@@ -17,12 +17,12 @@ const AdminDashboard = () => {
 
   const [payload, setPayload] = useState({
     sliceIndex: 1,
-    sliceSize: 10,
+    sliceSize: 1000,
     searchTerm: "",
     isBeingEvaluated: false,
   });
 
-  const { getPatientsWithFilters, data, success, deletePatient } = useGetPatientsWithFilters();
+  const { getPatientsWithFilters, data, success, deletePatient, deleteDoctor } = useGetPatientsWithFilters();
 
   const { getDoctorsWithFilters, dataDoctor } = useGetPatientsWithFilters();
 
@@ -30,6 +30,16 @@ const AdminDashboard = () => {
     useRegisterDoctor();
 
   const { logout } = useLogout();
+
+  useEffect(() => {
+    console.log(dataDoctor)
+  }, [dataDoctor])
+
+  useEffect(() => {
+    console.log(data)
+  }, [data])
+  
+  
 
   return (
     <>
@@ -226,12 +236,12 @@ const AdminDashboard = () => {
           </div>
           <div className={styles.searchPatientFooter}>
             <div className={styles.searchPatientSearchInputContainer}>
-              <input
+              {/* <input
                 type="text"
                 name="patientTerm"
                 placeholder="Buscar por CI, Nombre..."
                 ref={patientsSearchInput}
-              />
+              /> */}
               <button
                 className={`button-primary button-sm ${
                   isLoading ? "loading" : ""
@@ -239,15 +249,14 @@ const AdminDashboard = () => {
                 disabled={isLoading}
                 style={{ fontSize: "18px" }}
                 onClick={() => {
-                  setPayload((prev) => ({ ...prev, sliceIndex: 1 }));
+                 
                   getPatientsWithFilters({
                     ...payload,
                     sliceIndex: 1,
-                    searchTerm: patientsSearchInput.current.value,
                   });
                 }}
               >
-                Buscar
+                Consultar
                 <MoonLoader color="#fff" loading={isLoading} size={16} />
               </button>
             </div>
@@ -343,12 +352,12 @@ const AdminDashboard = () => {
           </div>
           <div className={styles.searchPatientFooter}>
             <div className={styles.searchPatientSearchInputContainer}>
-              <input
+              {/* <input
                 type="text"
                 name="patientTerm"
                 placeholder="Buscar por CI, Nombre..."
                 ref={patientsSearchInput}
-              />
+              /> */}
               <button
                 className={`button-primary button-sm ${
                   isLoading ? "loading" : ""
@@ -360,11 +369,10 @@ const AdminDashboard = () => {
                   getDoctorsWithFilters({
                     ...payload,
                     sliceIndex: 1,
-                    searchTerm: patientsSearchInput.current.value,
                   });
                 }}
               >
-                Buscar
+                Consultar
                 <MoonLoader color="#fff" loading={isLoading} size={16} />
               </button>
             </div>
@@ -382,16 +390,16 @@ const AdminDashboard = () => {
                 </div>
               )}
               <ul className={styles.searchPatientList}>
-                {dataDoctor?.results?.map((patient) => (
+                {dataDoctor?.map((doctor) => (
                   <li
-                    key={patient.id}
+                    key={doctor.id}
                     className={`${styles.searchPatientListItem}`}
                   >
                     <div>
                       <div className={styles.searchPatientItemHeader}>
-                        <h4>{`${patient.names} ${patient.surnames}`}</h4>
+                        <h4>{`${doctor.names} ${doctor.surnames}`}</h4>
                         <div className={styles.searchPatientItemHeaderDoc}>
-                          <strong>CI:</strong> {patient.ci}
+                          <strong>CI:</strong> {doctor.ci}
                         </div>
                         <div
                           className={styles.actualTreatmentHeaderDetails}
@@ -406,17 +414,19 @@ const AdminDashboard = () => {
                             >
                               Edad:
                             </strong>
-                            {patient.age} años
+                            {doctor.age} años
                           </div>
                           <div>
                             <strong className={styles.label}>
                               Fecha de nacimiento:
                             </strong>{" "}
-                            {new Date(patient.bornDate).toLocaleDateString()}
+                            {new Date(doctor.bornDate).toLocaleDateString()}
                           </div>
                         </div>
                         <div className={styles.searchPatientIconContainer}>
-                          <i className="bi bi-plus-square-fill"></i>
+                          <span onClick={() => deleteDoctor(doctor.id)}>
+                            <img className={styles.imgPaper} src={imgPaper} alt="" />
+                          </span>
                         </div>
                       </div>
                     </div>

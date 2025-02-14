@@ -39,6 +39,7 @@ function useGetPatientsWithFilters() {
         }));
       } else {
         setData(json.data);
+        console.log(json.data)
       }
       setSuccess(true);
       setIsLoading(false);
@@ -55,9 +56,7 @@ function useGetPatientsWithFilters() {
       setIsLoading(true);
       setSuccess(false);
       const serviceResp = await fetch(
-        `${API.URL}/doctor/getdoctorpatientswithfilters${convertFilters(
-          filters
-        )}`,
+        `${API.URL}/doctor/getalldoctors`,
         {
           method: "GET",
           credentials: "include",
@@ -72,6 +71,7 @@ function useGetPatientsWithFilters() {
         }));
       } else {
         setDataDoctor(json.data);
+        console.log(json.data)
       }
       setSuccess(true);
       setIsLoading(false);
@@ -116,13 +116,50 @@ function useGetPatientsWithFilters() {
     }
   }
 
+  async function deleteDoctor(id) {
+    console.log(id);
+
+    try {
+      setIsLoading(true);
+      setSuccess(false);
+      const serviceResp = await fetch(
+        `${API.URL}/doctor/deletedoctor?doctorId=${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
+      if (!serviceResp.ok) {
+        // Verifica errores HTTP (status fuera de 200-299)
+        const errorData = await serviceResp.json(); // Intenta parsear la respuesta de error
+        getDoctorsWithFilters()
+
+        throw new Error(
+          errorData.message || `Error HTTP! status: ${serviceResp.status}`
+        ); // Lanza un error
+      }
+
+      const json = await serviceResp.json();
+      setSuccess(true);
+      console.log("Respuesta:", json);
+      getPatientsWithFilters()
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return {
     isLoading,
     data,
+    dataDoctor,
     success,
     getPatientsWithFilters,
     getDoctorsWithFilters,
     deletePatient,
+    deleteDoctor
   };
 }
 export default useGetPatientsWithFilters;
